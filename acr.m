@@ -109,7 +109,7 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 4: Get the matrix of reaction vectors of the network and its rank (this point onward is based on [1])
+    % STEP 4: Get the matrix of reaction vectors of the network and its rank
     %
     
     R = N';
@@ -397,7 +397,7 @@ function [model, R, F, ACR_species] = acr(model)
                             
                             
     %
-    % STEP 14: For deficiency 0, check if the induced network is a weakly reversible power law system with reactant-determined kinetics (PL-RDK) with the Shinar-Feinberg pair in the same linkage class in the induced network (based on [2])
+    % STEP 14: For deficiency 0, check if the induced network is a weakly reversible power law system with reactant-determined kinetics (PL-RDK) with the Shinar-Feinberg pair in the same linkage class in the induced network
     %
                             
                             PL_RDK = is_PL_RDK(model_N1, m);
