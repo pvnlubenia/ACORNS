@@ -242,7 +242,6 @@ function [model, R, F, ACR_species] = acr(model)
     %
     
     % Write R in reduced row echelon form: the transpose of R is used so basis_reac_num will give the pivot rows of R
-    %    - 'A' is R in reduced row echelon form
     %    - basis_reac_num gives the row numbers of R which form a basis for the rowspace of R
     [~, basis_reac_num] = rref(R');
     
