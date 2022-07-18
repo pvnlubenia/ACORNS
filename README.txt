@@ -10,9 +10,7 @@ Matlab was used to develop the functions used here.
 
 =========
 Functions
-=========The function acr returns a list of species (together with the Shinar-Feinberg (SF) pair associated with each and the deficiency of the building block subnetwork containing the SF-pair) with absolute concentration robustness (ACR) in a chemical reaction network (CRN), if they exist. ACR in a species is checked for each SF-pair even if the species is already determined to have ACR considering a different SF-pair. If no species is found or the network is not of SF-type, a message appears saying so.
-
-The output variables 'model', 'R', 'F', and 'ACR_species' allow the user to view the following, respectively:
+=========The function acr returns a list of species (together with the Shinar-Feinberg (SF) pair associated with each and the deficiency of the building block subnetwork containing the SF-pair) with absolute concentration robustness (ACR) in a chemical reaction network (CRN), if they exist. ACR in a species is checked for each SF-pair even if the species is already determined to have ACR considering a different SF-pair. If no species is found or the network is not of SF-type, a message appears saying so. Furthermore, the output variables 'model', 'R', 'F', and 'ACR_species' allow the user to view the following, respectively:
 
    - Complete network with all the species listed in the 'species' field of the structure 'model'
    - Matrix of reaction vectors of the network
@@ -114,6 +112,22 @@ How to fill out 'model' structure
              - reactant1: a list of numbers representing the kinetic order of each species in the reactant complex in the left to right direction (listed in the same order of the species)
              - reactant2: a list of numbers representing the kinetic order of each species in the reactant complex in the right to left direction (listed in the same order of the species) (empty if the reaction is not reversible)
 
+To fill out the 'model' structure, write a string for 'model.id': this is just to put a name to the network. To add the reactions to the network, use the function addReaction where the output is 'model'. addReaction is developed to make the input of reactions of the CRN easier than the input in [7]:
+
+   addReaction
+      - OUTPUT: Returns a structure called 'model' with added field 'reaction' with subfields 'id', 'reactant', 'product', 'reversible', and 'kinetic'. The output variable 'model' allows the user to view the network with the added reaction.
+      - INPUTS
+           - model: a structure, representing the CRN
+           - id: visual representation of the reaction, e.g., reactant -> product (string)
+           - reactant_species: species of the reactant complex (cell)
+           - reactant_stoichiometry: stoichiometry of the species of the reactant complex (cell)
+           - reactant_kinetic: kinetic orders of the species of the reactant complex (array)
+           - product_species: species of the product complex (cell)
+           - product_stoichiometry: stoichiometry of the species of the product complex (cell)
+           - product_kinetic: "kinetic orders" of the species of the product complex, if the reaction is reversible (array); if the reaction in NOT reversible, leave blank
+           - reversible: logical; whether the reaction is reversible or not (true or false)
+      * Make sure the function addReaction is in the same folder/path being used as the current working directory.
+
 Note that for the functions acr and acr2:
 
      1. It is assumed that the CRN has a positive equilibrium.
@@ -155,7 +169,7 @@ Contact Information
 For questions, comments, and suggestions, feel free to contact me at pvnlubenia@yahoo.co.uk.
 
 
-- Patrick Lubenia (18 June 2022)
+- Patrick Lubenia (18 July 2022)
 
 
 

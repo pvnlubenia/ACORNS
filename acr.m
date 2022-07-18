@@ -1,90 +1,58 @@
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%                                                                             %
-%    acr                                                                      %
-%                                                                             %
-%                                                                             %
-% OUTPUT: Returns a list of species (together with the Shinar-Feinberg (SF)   %
-%            pair associated with each and the deficiency of the building     %
-%            block subnetwork containing the SF-pair) with absolute           %
-%            concentration robustness (ACR) in a chemical reaction network    %
-%            (CRN), if they exist. ACR in a species is checked for each       %
-%            SF-pair even if the species is already determined to have ACR    %
-%            considering a different SF-pair. If no species is found or the   %
-%            network is not of SF-type, a message appears saying so.          %
-%         The output variables 'model', 'R', 'F', and 'ACR_species' allow the %
-%            user to view the following, respectively:                        %
-%               - Complete network with all the species listed in the         %
-%                    'species' field of the structure 'model'                 %
-%               - Matrix of reaction vectors of the network                   %
-%               - Kinetic order matrix of the network                         %
-%               - List of species with absolute concentration robustness      %
-% INPUT: model: a structure, representing the CRN, with the following fields: %
-%           - id: name of the model                                           %
-%           - species: a list of all species in the network; this is left     %
-%                blank since incorporated into the function is a step which   %
-%                compiles all species used in the model                       %
-%           - reaction: a list of all reactions in the network, each with the %
-%                following subfields:                                         %
-%                   - id: a string representing the reaction                  %
-%                   - reactant: has the following further subfields:          %
-%                        - species: a list of strings representing the        %
-%                             species in the reactant complex                 %
-%                        - stoichiometry: a list of numbers representing the  %
-%                             stoichiometric coefficient of each species in   %
-%                             the reactant complex (listed in the same order  %
-%                             of the species)                                 %
-%                   - product: has the following further subfields:           %
-%                        - species: a list of strings representing the        %
-%                             species in the product complex                  %
-%                        - stoichiometry: a list of numbers representing the  %
-%                             stoichiometric coefficient of each species in   %
-%                             the product complex (listed in the same order   %
-%                             of the species)                                 %
-%                   - reversible: has the value true or false indicating if   %
-%                        the reaction is reversible or not, respectively      %
-%                   - kinetic: has the following further subfields:           %
-%                        - reactant1: a list of numbers representing the      %
-%                             kinetic order of each species in the reactant   %
-%                             complex in the left to right direction (listed  %
-%                             in the same order of the species)               %
-%                        - reactant2: a list of numbers representing the      %
-%                             kinetic order of each species in the reactant   %
-%                             complex in the right to left direction (listed  %
-%                             in the same order of the species) (empty if the %
-%                             reaction is not reversible)                     %
-%        Notes:                                                               %
-%           1. It is assumed that the CRN has a positive equilibrium.         %
-%           2. It is also assumed that the CRN has power law kinetics.        %
-%           3. The CRN should have at least 2 species and 2 reactions         %
-%                 (to form an SF-pair).                                       %
-%           4. Notes 2 and 3 imply that we assume the CRN is a power law      %
-%                 kinetic system of SF-type.                                  %
-%           5. This code is based largely on [1] with modifications based on  %
-%                 [2].                                                        %
-%                                                                             %
-% References                                                                  %
-%    [1] Fontanil L, Mendoza E, Fortun N (2021) A computational approach to   %
-%           concentration robustness in power law kinetic systems of          %
-%           Shinar-Feinberg type. MATCH Commun Math Comput Chem               %
-%           86(3):489-516.                                                    %
-%    [2] Lao A, Lubenia P, Magpantay D, Mendoza E (2022) Concentration        %
-%           robustness in LP kinetic systems. MATCH Commun Math Comput Chem   %
-%           88(1):29-66. https://doi.org/10.46793/match.88-1.029L             %
-%    [3] Soranzo N, Altafini C (2009) ERNEST: a toolbox for chemical reaction %
-%           network theory. Bioinform 25(21):2853–2854.                       %
-%           https://doi.org/10.1093/bioinformatics/btp513                     %
-%                                                                             %
-% Created: 17 June 2022                                                       %
-% Last Modified: 18 June 2022                                                 %
-%                                                                             %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%                                                                           %
+%    acr                                                                    %
+%                                                                           %
+%                                                                           %
+% OUTPUT: Returns a list of species (together with the Shinar-Feinberg (SF) %
+%    pair associated with each and the deficiency of the building block     %
+%    subnetwork containing the SF-pair) with absolute concentration         %
+%    robustness (ACR) in a chemical reaction network (CRN), if they exist.  %
+%    ACR in a species is checked for each SF-pair even if the species is    %
+%    already determined to have ACR considering a different SF-pair. If no  %
+%    species is found or the network is not of SF-type, a message appears   %
+%    saying so. The output variables 'model', 'R', 'F', and 'ACR_species'   %
+%    allow the user to view the following, respectively:                    %
+%       - Complete network with all the species listed in the 'species'     %
+%            field of the structure 'model'                                 %
+%       - Matrix of reaction vectors of the network                         %
+%       - Kinetic order matrix of the network                               %
+%       - List of species with absolute concentration robustness            %
+%                                                                           %
+% INPUT: model: a structure, representing the CRN (see README.txt for       %
+%    details on how to fill out the structure)                              %
+%                                                                           %
+% Notes:                                                                    %
+%    1. It is assumed that the CRN has a positive equilibrium.              %
+%    2. It is also assumed that the CRN has power law kinetics.             %
+%    3. The CRN should have at least 2 species and 2 reactions (to form an  %
+%          SF-pair).                                                        %
+%    4. Notes 2 and 3 imply that we assume the CRN is a power law kinetic   %
+%          system of SF-type.                                               %
+%    5. This code is based largely on [1] with modifications based on [2].  %
+%                                                                           %
+% References                                                                %
+%    [1] Fontanil L, Mendoza E, Fortun N (2021) A computational approach to %
+%           concentration robustness in power law kinetic systems of        %
+%           Shinar-Feinberg type. MATCH Commun Math Comput Chem             %
+%           86(3):489-516.                                                  %
+%    [2] Lao A, Lubenia P, Magpantay D, Mendoza E (2022) Concentration      %
+%           robustness in LP kinetic systems. MATCH Commun Math Comput Chem %
+%           88(1):29-66. https://doi.org/10.46793/match.88-1.029L           %
+%    [3] Soranzo N, Altafini C (2009) ERNEST: a toolbox for chemical        %
+%           reaction network theory. Bioinform 25(21):2853–2854.            %
+%           https://doi.org/10.1093/bioinformatics/btp513                   %
+%                                                                           %
+% Created: 17 June 2022                                                     %
+% Last Modified: 18 July 2022                                               %
+%                                                                           %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 
 
 function [model, R, F, ACR_species] = acr(model)
     
     %
-    % STEP 1: Add to 'model.species' all species indicated in the reactions
+    % Step 1: Create a list of all species indicated in the reactions
     %
     
     [model, m] = model_species(model);
@@ -92,15 +60,15 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 2: Form stoichiometric matrix N
+    % Step 2: Form stoichiometric matrix N
     %
     
-    [N, reactant_complex, product_complex, r] = stoich_matrix(model, m);
+    [N, reactant_complex, ~, r] = stoich_matrix(model, m);
     
     
     
     %
-    % STEP 3: Form kinetic order matrix F
+    % Step 3: Form kinetic order matrix F
     %    Reminder: Algorithm assumes the system is mass action
     %
     
@@ -109,7 +77,7 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 4: Get the matrix of reaction vectors of the network and its rank
+    % Step 4: Get the matrix of reaction vectors of the network and its rank
     %
     
     R = N';
@@ -117,17 +85,8 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 5: Create a list of reactant complexes
+    % Step 5: Create a list of reactant complexes
     %
-    
-    % Get just the unique complexes
-    [Y, ~, ~] = unique([reactant_complex, product_complex]', 'rows');
-    
-    % Construct the matrix of complexes
-    Y = Y';
-    
-    % Count the number of complexes
-    n = size(Y, 2);
     
     % Initialize list of reactant complexes
     reactant_complex_list = { };
@@ -181,7 +140,7 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 6: Get all Shinar-Feinberg pairs
+    % Step 6: Get all Shinar-Feinberg pairs
     %
     
     % Initialize list of Shinar-Feinberg pairs
@@ -200,7 +159,7 @@ function [model, R, F, ACR_species] = acr(model)
             % Make all nonzero entries equal to 1 (for comparison later with true or false values)
             nonzeros(nonzeros ~= 0) = 1;
             
-            % Check which kinetics orders match
+            % Check which kinetic orders match
             kinetics = F(i, :) == F(j, :);
             
             % Ignore if both kinetic orders are 0
@@ -238,7 +197,7 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 7: Form a basis for the rowspace of R
+    % Step 7: Form a basis for the rowspace of R
     %
     
     % Write R in reduced row echelon form: the transpose of R is used so basis_reac_num will give the pivot rows of R
@@ -255,7 +214,7 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 8: Get a Shinar-Feinberg pair
+    % Step 8: Get a Shinar-Feinberg pair
     %
     
     % Initialize flag for the loops
@@ -271,7 +230,7 @@ function [model, R, F, ACR_species] = acr(model)
         
         
     %
-    % STEP 9: Extend the pair to a basis for the rowspace of R
+    % Step 9: Extend the pair to a basis for the rowspace of R
     %
         
         % Note: A vector v is a linear combination of vectors in a matrix A if the rank of the matrix [A, v] (v is appended to A) is the same as the rank of A
@@ -332,7 +291,7 @@ function [model, R, F, ACR_species] = acr(model)
         
         
     %
-    % STEP 10: Check if R is the union of span(B1) and span(B2)
+    % Step 10: Check if R is the union of span(B1) and span(B2)
     %
         
         % Form span_B1 and span_B2
@@ -356,7 +315,7 @@ function [model, R, F, ACR_species] = acr(model)
             
             
     %
-    % STEP 11: Transfer some elements of B2 to B1 until an independent binary decomposition is found
+    % Step 11: Transfer some elements of B2 to B1 until an independent binary decomposition is found
     %
             
             % Go through each set in the power set
@@ -379,7 +338,7 @@ function [model, R, F, ACR_species] = acr(model)
                         
                         
     %
-    % STEP 12: Get the deficiency of the network induced by span(B1)
+    % Step 12: Get the deficiency of the network induced by span(B1)
     %
                         
                         % Create network N1 called model_N1 from span(B1) and compute its deficiency delta1
@@ -388,7 +347,7 @@ function [model, R, F, ACR_species] = acr(model)
                         
                         
     %
-    % STEP 13: Repeat from STEP 11 until the deficiency of the network induced by span(B1) is less than or equal to 1
+    % Step 13: Repeat from Step 11 until the deficiency of the network induced by span(B1) is less than or equal to 1
     %
                         
                         % Case 1: The deficiency is 0
@@ -397,7 +356,7 @@ function [model, R, F, ACR_species] = acr(model)
                             
                             
     %
-    % STEP 14: For deficiency 0, check if the induced network is a weakly reversible power law system with reactant-determined kinetics (PL-RDK) with the Shinar-Feinberg pair in the same linkage class in the induced network
+    % Step 14: For deficiency 0, check if the induced network is a weakly reversible power law system with reactant-determined kinetics (PL-RDK) with the Shinar-Feinberg pair in the same linkage class in the induced network
     %
                             
                             PL_RDK = is_PL_RDK(model_N1, m);
@@ -435,7 +394,7 @@ function [model, R, F, ACR_species] = acr(model)
                           
                           
     %
-    % STEP 15: For deficiency 1, check if the induced network is a PL-RDK system AND that the reactant complexes of the Shinar-Feinberg pairs are nonterminal complexes
+    % Step 15: For deficiency 1, check if the induced network is a PL-RDK system AND that the reactant complexes of the Shinar-Feinberg pairs are nonterminal complexes
     %
     
                             PL_RDK = is_PL_RDK(model_N1, m);
@@ -474,17 +433,17 @@ function [model, R, F, ACR_species] = acr(model)
             end
       
         % Case 2: R is the union of span(B1) and span(B2)
-        % We jump to STEP 12 and continue up to STEP 15
+        % We jump to Step 12 and continue up to Step 15
         else
             
-            % STEP 12
+            % Step 12
             [model_N1, delta1] = deficiency(model, span_B1);
             
-            % STEP 13
+            % Step 13
             % Case 1: The deficiency is 0
             if delta1 == 0
                 
-                % STEP 14
+                % Step 14
                 PL_RDK = is_PL_RDK(model_N1, m);
                 if PL_RDK
                     weakly_reversible = is_weakly_reversible(model_N1, m);
@@ -502,7 +461,7 @@ function [model, R, F, ACR_species] = acr(model)
             % Case 2: The deficiency is 1
             elseif delta1 == 1
             
-                % STEP 15
+                % Step 15
                 PL_RDK = is_PL_RDK(model_N1, m);
                 if PL_RDK
                     reactant_complex1 = reactant_complex_list{SF_pair1};
@@ -517,7 +476,7 @@ function [model, R, F, ACR_species] = acr(model)
             else
                 
                 % NOTE: This repeats STEPS 11-15 where we go through each set in the power set until we get a subnetwork with deficiency less than or equal to 1
-                % STEP 11
+                % Step 11
                 for j = 1:numel(power_set_B2)
                     for k = 1:size(power_set_B2{j}, 1)
                         B1_new = [B1 power_set_B2{j}(k, :)];
@@ -526,13 +485,13 @@ function [model, R, F, ACR_species] = acr(model)
                         [binary_decomp, span_B1] = R_is_span_union(B1_new, B2_new, R);
                         if binary_decomp == 1
                             
-                            % STEP 12
+                            % Step 12
                             [model_N1, delta1] = deficiency(model, span_B1);
                             
-                            % STEP 13
+                            % Step 13
                             if delta1 == 0
                                 
-                                % STEP 14
+                                % Step 14
                                 PL_RDK = is_PL_RDK(model_N1, m);
                                 if PL_RDK
                                     weakly_reversible = is_weakly_reversible(model_N1, m);
@@ -549,7 +508,7 @@ function [model, R, F, ACR_species] = acr(model)
                                 end
                             elseif delta1 == 1
                                 
-                                % STEP 15
+                                % Step 15
                                 PL_RDK = is_PL_RDK(model_N1, m);
                                 if PL_RDK
                                     reactant_complex1 = reactant_complex_list{SF_pair1};
@@ -578,7 +537,7 @@ function [model, R, F, ACR_species] = acr(model)
     
     
     %
-    % STEP 16: Display the results
+    % Step 16: Display the results
     %
     
     % Case 1: No ACR in any species
@@ -625,12 +584,15 @@ end
 %         - model: completed structure                                %
 %         - m: number of species                                      %
 %    - Used in                                                        %
-%         - acr (STEP 1)                                              %
+%         - acr (Step 1)                                              %
 %         - deficiency                                                %
 %                                                                     %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function [model, m] = model_species(model)
+
+    % Initialize list of species
+    model.species = { };
 
     % Get all species from reactants
     for i = 1:numel(model.reaction)
@@ -671,7 +633,7 @@ end
 %         - product_complex: matrix of product complexes          %
 %         - r: total number of reactions                          %
 %    - Used in                                                    %
-%         - acr (STEP 2)                                          %
+%         - acr (Step 2)                                          %
 %         - deficiency                                            %
 %         - is_PL_RDK                                             %
 %         - is_weakly_reversible                                  %
@@ -746,7 +708,7 @@ end
 %    - Output                                                       %
 %         - F: kinetic order matrix                                 %
 %    - Used in                                                      %
-%         - acr (STEP 3)                                            %
+%         - acr (Step 3)                                            %
 %         - is_PL_RDK                                               %
 %                                                                   %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -873,7 +835,7 @@ end
 %    - Ouputs                                                           %
 %         - model_N1: new model created from span(B1)                   %
 %         - delta1: deficiency of model_N1                              %
-%    - Used in acr (STEP 12)                                            %
+%    - Used in acr (Step 12)                                            %
 %                                                                       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
@@ -911,14 +873,12 @@ function [model_N1, delta1] = deficiency(model, span_B1)
     [N, reactant_complex, product_complex, r] = stoich_matrix(model_N1, m);
         
     % Get just the unique complexes
-    % ind2(i) is the index in Y of the reactant complex in reaction i
-    [Y, ~, ind2] = unique([reactant_complex, product_complex]', 'rows');
-    
-    % Construct the matrix of complexes
-    Y = Y';
+    % index(i) is the index in all_complex of the reactant complex in reaction i
+    [all_complex, ~, index] = unique([reactant_complex, product_complex]', 'rows');
+    all_complex = all_complex';
     
     % Count the number of complexes
-    n = size(Y, 2);
+    n = size(all_complex, 2);
     
     % Initialize a matrix (complexes x complexes) for the reacts_to relation
     % This is for testing reversibility of the network
@@ -932,11 +892,11 @@ function [model_N1, delta1] = deficiency(model, span_B1)
     for i = 1:r
         
         % reacts_to(i, j) = true iff there is a reaction r: y_i -> y_j
-        reacts_to(ind2(i), ind2(i + r)) = true;
+        reacts_to(index(i), index(i + r)) = true;
         
         % reacts_in(i, r) = -1 and reacts_in(j, r) = 1) iff there is a reaction r: y_i -> y_j
-        reacts_in(ind2(i), i) = -1;
-        reacts_in(ind2(i+r), i) = 1;
+        reacts_in(index(i), i) = -1;
+        reacts_in(index(i+r), i) = 1;
     end
     
     % Linkage classes
@@ -1054,24 +1014,22 @@ end
 %    - Ouput                                                          %
 %         - weakly_reversible: logical; whether the system is weakly  %
 %              reversible or not                                      %
-%    - Used in acr (STEP 14)                                          %
+%    - Used in acr (Step 14)                                          %
 %                                                                     %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function weakly_reversible = is_weakly_reversible(model, m)
     
     % Form stoichiometric matrix N
-    [N, reactant_complex, product_complex, r] = stoich_matrix(model, m);
+    [~, reactant_complex, product_complex, r] = stoich_matrix(model, m);
     
     % Get just the unique complexes
-    % ind2(i) is the index in Y of the reactant complex in reaction i
-    [Y, ~, ind2] = unique([reactant_complex, product_complex]', 'rows');
-    
-    % Construct the matrix of complexes
-    Y = Y';
+    % index(i) is the index in all_complex of the reactant complex in reaction i
+    [all_complex, ~, index] = unique([reactant_complex, product_complex]', 'rows');
+    all_complex = all_complex';
     
     % Count the number of complexes
-    n = size(Y, 2);
+    n = size(all_complex, 2);
         
     % Initialize a matrix (complexes x complexes) for the reacts_to relation
     % This is for testing reversibility of the network
@@ -1085,11 +1043,11 @@ function weakly_reversible = is_weakly_reversible(model, m)
     for i = 1:r
         
         % reacts_to(i, j) = true iff there is a reaction r: y_i -> y_j
-        reacts_to(ind2(i), ind2(i + r)) = true;
+        reacts_to(index(i), index(i + r)) = true;
         
         % reacts_in(i, r) = -1 and reacts_in(j, r) = 1) iff there is a reaction r: y_i -> y_j
-        reacts_in(ind2(i), i) = -1;
-        reacts_in(ind2(i+r), i) = 1;
+        reacts_in(index(i), i) = -1;
+        reacts_in(index(i+r), i) = 1;
     end
     
     % Linkage classes
@@ -1143,45 +1101,45 @@ end
 %                                                               %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-function [g, vertices] = add_vertices(g, n, Y, model)
+function [g, vertices] = add_vertices(g, n, all_complex, model)
     
     % Go through each column of Y (a complex)
     for i = 1:n
         
         % Get each column of Y
-        Y_ = Y(:, i);
+        all_complex_ = all_complex(:, i);
 
         % Get the index numbers of nonzero entries
-        Y_nnz = find(Y_);
+        all_complex_nnz = find(all_complex_);
 
         % For the zero complex
-        if numel(Y_nnz) == 0
+        if numel(all_complex_nnz) == 0
             complex = '0';
         
         % Otherwise
         else
             
             % Check which species appear in the complex
-            for j = 1:numel(Y_nnz)
+            for j = 1:numel(all_complex_nnz)
                 
                 % For the first species
                 if j == 1
                     
                     % Don't show the stoichiometry if it's 1
-                    if Y_(Y_nnz(j)) == 1
-                        complex = [model.species{Y_nnz(j)}];
+                    if all_complex_(all_complex_nnz(j)) == 1
+                        complex = [model.species{all_complex_nnz(j)}];
                     
                     % Otherwise, include it
                     else
-                        complex = [num2str(Y_(Y_nnz(j))), model.species{Y_nnz(j)}];
+                        complex = [num2str(all_complex_(all_complex_nnz(j))), model.species{all_complex_nnz(j)}];
                     end
                 
                 % We need the + sign for succeeding species
                 else
-                    if Y_(Y_nnz(j)) == 1
-                        complex = [complex, '+', model.species{Y_nnz(j)}];
+                    if all_complex_(all_complex_nnz(j)) == 1
+                        complex = [complex, '+', model.species{all_complex_nnz(j)}];
                     else
-                        complex = [complex, '+', num2str(Y_(Y_nnz(j))), model.species{Y_nnz(j)}];
+                        complex = [complex, '+', num2str(all_complex_(all_complex_nnz(j))), model.species{all_complex_nnz(j)}];
                     end
                 end
             end 
@@ -1251,30 +1209,28 @@ end
 %    - Ouput                                                              %
 %         - same_linkage_class: logical; whether the two complexes are in %
 %              the same linkage class or not                              %
-%    - Used in acr (STEP 14)                                              %
+%    - Used in acr (Step 14)                                              %
 %                                                                         %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function same_linkage_class = in_same_linkage_class(complex1, complex2, model, m)
     
     % Form stoichiometric matrix N
-    [N, reactant_complex, product_complex, r] = stoich_matrix(model, m);
+    [~, reactant_complex, product_complex, r] = stoich_matrix(model, m);
     
     
     % Get just the unique complexes
-    [Y, ~, ~] = unique([reactant_complex, product_complex]', 'rows');
-    
-    % Construct the matrix of complexes
-    Y = Y';
+    all_complex = unique([reactant_complex, product_complex]', 'rows');
+    all_complex = all_complex';
     
     % Count the number of complexes
-    n = size(Y, 2);
+    n = size(all_complex, 2);
         
     % Initialize an undirected graph g
     g = graph();
 
     % Add to g all complexes as vertices
-    [g, vertices] = add_vertices(g, n, Y, model);
+    [g, vertices] = add_vertices(g, n, all_complex, model);
 
     % Check if complex1 is a valid string of complexes
     if isempty(find(strcmp(vertices, complex1)))
@@ -1293,7 +1249,7 @@ function same_linkage_class = in_same_linkage_class(complex1, complex2, model, m
     end
     
     % Add to g all reactions as edges
-    [g, ~] = add_edges(g, vertices, r, Y, reactant_complex, product_complex);
+    g = add_edges(g, vertices, r, all_complex, reactant_complex, product_complex);
     
     % Get the linkage class of each complex    
     linkage_class = conncomp(g);
@@ -1318,29 +1274,27 @@ end
 %    - Ouput                                                            %
 %         - nonterminal: logical; whether the complex is nonterminal or %
 %              not                                                      %
-%    - Used in acr (STEP 15)                                            %
+%    - Used in acr (Step 15)                                            %
 %                                                                       %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 function nonterminal = is_nonterminal(check_complex, model, m)
 
     % Form stoichiometric matrix N
-    [N, reactant_complex, product_complex, r] = stoich_matrix(model, m);
+    [~, reactant_complex, product_complex, r] = stoich_matrix(model, m);
     
     % Get just the unique complexes
-    [Y, ~, ~] = unique([reactant_complex, product_complex]', 'rows');
-    
-    % Construct the matrix of complexes
-    Y = Y';
+    all_complex = unique([reactant_complex, product_complex]', 'rows');
+    all_complex = all_complex';
     
     % Count the number of complexes
-    n = size(Y, 2);
+    n = size(all_complex, 2);
         
     % Initialize a directed graph g
     g = digraph();
     
     % Add to g all complexes as vertices
-    [g, vertices] = add_vertices(g, n, Y, model);
+    [g, vertices] = add_vertices(g, n, all_complex, model);
     
     % Check if check_complex is a valid string of complexes
     if isempty(find(strcmp(vertices, check_complex)))
@@ -1350,7 +1304,7 @@ function nonterminal = is_nonterminal(check_complex, model, m)
     end
     
     % Add a directed edge to g: Ci -> Cj forms an edge
-    [g, ~] = add_edges(g, vertices, r, Y, reactant_complex, product_complex);
+    g = add_edges(g, vertices, r, all_complex, reactant_complex, product_complex);
     
     % Determine in which strong linkage class each complex belongs to
     strong_linkage_class = conncomp(g);
