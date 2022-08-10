@@ -189,4 +189,4 @@ References
 
    [6] Meshkat N, Shiu A, Torres A (2021) Absolute concentration robustness in networks with low-dimensional stoichiometric subspace. Vietnam J Math https://doi.org/10.1007/s10013-021-00524-5
 
-   [7] Soranzo N, Altafini C (2009) ERNEST: a toolbox for chemical reaction network theory. Bioinform 25(21):2853Ð2854. https://doi.org/10.1093/bioinformatics/btp513
+   [7] Soranzo N, Altafini C (2009) ERNEST: a toolbox for chemical reaction network theory. Bioinform 25(21):2853-2854. https://doi.org/10.1093/bioinformatics/btp513
